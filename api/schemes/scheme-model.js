@@ -146,7 +146,8 @@ async function findSteps(scheme_id) {
       "steps.step_id",
       "steps.step_number",
       "instructions",
-      "schemes.scheme_id"
+      "schemes.scheme_id",
+      "schemes.scheme_name"
     )
     .where("schemes.scheme_id", scheme_id)
     .orderBy("step_number");
