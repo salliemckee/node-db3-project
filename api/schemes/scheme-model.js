@@ -141,7 +141,7 @@ async function findSteps(scheme_id) {
       ]
   */
   const rows = await db("schemes")
-    .leftJoin("steps", "schemes.scheme_id", "steps.scheme_name")
+    .leftJoin("steps", "schemes.scheme_id", "steps.scheme_id")
     .select(
       "steps.step_id",
       "steps.step_number",
@@ -150,7 +150,6 @@ async function findSteps(scheme_id) {
     )
     .where("schemes.scheme_id", scheme_id)
     .orderBy("step_number");
-
   if (!rows[0].step_id) return [];
   return rows;
 }
