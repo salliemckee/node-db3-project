@@ -25,7 +25,7 @@ function find() {
     .groupBy("schemes.scheme_id");
 }
 
-function findById(scheme_id) {
+async function findById(scheme_id) {
   // EXERCISE B
   /*
     1B- Study the SQL query below running it in SQLite Studio against `data/schemes.db3`:
@@ -92,6 +92,24 @@ function findById(scheme_id) {
         "steps": []
       }
   */
+  const rows = await db("schemes")
+    .leftJoin("steps", "schemes.scheme_id", "steps.scheme_id")
+    .where("schemes.scheme_id", scheme_id)
+    .select("steps.*", "schemes.scheme_name", "schemes.scheme_id")
+    .orderBy("steps.step_number");
+
+  const result = {
+    scheme_id: rows[0].scheme_id,
+    scheme_name: rows[0].scheme_name,
+    steps: [],
+  };
+
+  rows.forEach((row) => {
+    if (row.step_id) {
+      result.steps.push(row);
+    }
+  });
+  return result;
 }
 
 function findSteps(scheme_id) {
