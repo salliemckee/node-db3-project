@@ -96,7 +96,7 @@ async function findById(scheme_id) {
     .leftJoin("steps", "schemes.scheme_id", "steps.scheme_id")
     .where("schemes.scheme_id", scheme_id)
     .select("steps.*", "schemes.scheme_name", "schemes.scheme_id")
-    .orderBy("steps.step_number");
+    .orderBy("steps.step_number", "asc");
 
   const result = {
     scheme_id: rows[0].scheme_id,
@@ -107,10 +107,12 @@ async function findById(scheme_id) {
   rows.forEach((row) => {
     if (row.step_id) {
       result.steps.push({
-        scheme_id: row.scheme_id,
-        scheme_number: row.scheme_number,
+        step_id: row.step_id,
+        step_number: row.step_number,
         instructions: row.instructions,
       });
+    } else {
+      return result;
     }
   });
   return result;
@@ -172,6 +174,18 @@ function addStep(scheme_id, step) {
     and resolves to _all the steps_ belonging to the given `scheme_id`,
     including the newly created one.
   */
+  return db("steps")
+    .insert({
+      ...step,
+      scheme_id,
+    })
+    .then(() => {
+      return db("steps")
+        .join("schemes", "schemes.scheme_id", "steps.scheme_id")
+        .select("step_id", "step_number", "instructions", "scheme_name")
+        .orderBy("step_number")
+        .where("schemes.scheme_id", scheme_id);
+    });
 }
 
 module.exports = {
