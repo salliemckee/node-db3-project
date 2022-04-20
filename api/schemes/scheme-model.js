@@ -106,13 +106,17 @@ async function findById(scheme_id) {
 
   rows.forEach((row) => {
     if (row.step_id) {
-      result.steps.push(row);
+      result.steps.push({
+        scheme_id: row.scheme_id,
+        scheme_number: row.scheme_number,
+        instructions: row.instructions,
+      });
     }
   });
   return result;
 }
 
-function findSteps(scheme_id) {
+async function findSteps(scheme_id) {
   // EXERCISE C
   /*
     1C- Build a query in Knex that returns the following data.
@@ -134,6 +138,19 @@ function findSteps(scheme_id) {
         }
       ]
   */
+  const rows = await db("schemes")
+    .leftJoin("steps", "schemes.scheme_id", "steps.scheme_name")
+    .select(
+      "steps.step_id",
+      "steps.step_number",
+      "instructions",
+      "schemes.scheme_id"
+    )
+    .where("schemes.scheme_id", scheme_id)
+    .orderBy("step_number");
+
+  if (!rows[0].step_id) return [];
+  return rows;
 }
 
 function add(scheme) {
@@ -141,6 +158,11 @@ function add(scheme) {
   /*
     1D- This function creates a new scheme and resolves to _the newly created scheme_.
   */
+  return db("schemes")
+    .insert(scheme)
+    .then(([scheme_id]) => {
+      return db("schemes").where("scheme_id", scheme_id).first();
+    });
 }
 
 function addStep(scheme_id, step) {
